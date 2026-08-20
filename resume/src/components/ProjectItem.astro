@@ -1,0 +1,33 @@
+---
+/**
+ * ProjectItem.astro — one project as a card. Technologies render as chips;
+ * an optional external link is validated as a URL by the schema.
+ */
+import type { Project } from "../schemas/resume.schema";
+import { formatRange } from "../scripts/format";
+
+interface Props {
+  project: Project;
+}
+const { project }: Props = Astro.props;
+const p = project;
+---
+
+<article class="card">
+  <h3>
+    {p.url ? (
+      <a href={p.url} target="_blank" rel="noopener noreferrer">{p.name}</a>
+    ) : (
+      p.name
+    )}
+  </h3>
+  {p.dates && <p class="credential__meta">{formatRange(p.dates)}</p>}
+  <p>{p.description}</p>
+  {p.technologies.length > 0 && (
+    <div class="chips project__tech" aria-label="Technologies">
+      {p.technologies.map((tech) => (
+        <span class="chip">{tech}</span>
+      ))}
+    </div>
+  )}
+</article>

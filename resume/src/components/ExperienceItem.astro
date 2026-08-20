@@ -1,0 +1,65 @@
+---
+/**
+ * ExperienceItem.astro
+ * ----------------------------------------------------------------------------
+ * One role as an <article> in the experience timeline. Dates use <time> with
+ * machine-readable datetime attributes. Responsibilities and achievements are
+ * proper lists. Empty sub-lists are omitted.
+ */
+import type { Experience } from "../schemas/resume.schema";
+import { formatRange, datetimeAttr } from "../scripts/format";
+import AchievementItem from "./AchievementItem.astro";
+
+interface Props {
+  experience: Experience;
+}
+const { experience }: Props = Astro.props;
+const xp = experience;
+const rangeLabel = formatRange(xp.dates);
+const startAttr = datetimeAttr(xp.dates.start);
+const endAttr = datetimeAttr(xp.dates.end);
+---
+
+<article class="xp">
+  <div class="xp__head">
+    <div>
+      <h3 class="xp__role">
+        {xp.role} <span class="xp__org">· {xp.organization}</span>
+      </h3>
+      {xp.location && <p class="xp__location">{xp.location}</p>}
+    </div>
+    <p class="xp__dates">
+      <time datetime={startAttr}>{rangeLabel.split(" \u2014 ")[0]}</time>
+      <span aria-hidden="true"> — </span>
+      {endAttr ? (
+        <time datetime={endAttr}>{rangeLabel.split(" \u2014 ")[1]}</time>
+      ) : (
+        <span>Present</span>
+      )}
+    </p>
+  </div>
+
+  {xp.summary && <p class="xp__summary">{xp.summary}</p>}
+
+  {xp.responsibilities.length > 0 && (
+    <>
+      <p class="xp__subhead">Responsibilities</p>
+      <ul class="bullets">
+        {xp.responsibilities.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </>
+  )}
+
+  {xp.achievements.length > 0 && (
+    <>
+      <p class="xp__subhead">Selected achievements</p>
+      <ul class="achievements">
+        {xp.achievements.map((achievement) => (
+          <AchievementItem achievement={achievement} />
+        ))}
+      </ul>
+    </>
+  )}
+</article>

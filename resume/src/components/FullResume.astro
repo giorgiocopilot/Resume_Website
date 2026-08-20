@@ -1,0 +1,135 @@
+---
+/**
+ * FullResume.astro
+ * ----------------------------------------------------------------------------
+ * Everything BELOW the reveal fold. This entire block is always present in the
+ * HTML (accessible with JS off, retrievable by crawlers). When JS is on it is
+ * collapsed by CSS until a contact button is clicked — see global.css and the
+ * SECURITY NOTE in reveal-resume.ts: this is presentation, NOT access control.
+ *
+ * Optional sections render ONLY when they contain entries, so they disappear
+ * cleanly when empty.
+ */
+import { resume } from "../data/resume.data";
+import ResumeSection from "./ResumeSection.astro";
+import ExperienceItem from "./ExperienceItem.astro";
+import ProjectItem from "./ProjectItem.astro";
+import SkillGroup from "./SkillGroup.astro";
+
+const {
+  experience,
+  projects,
+  skills,
+  education,
+  certifications,
+  languages,
+  publications,
+} = resume;
+
+// Compute a running two-digit section index only for non-empty sections.
+let n = 0;
+const idx = () => String(++n).padStart(2, "0");
+---
+
+<div id="full-resume">
+  {experience.length > 0 && (
+    <ResumeSection id="experience" title="Experience" index={idx()}>
+      <div class="timeline">
+        {experience.map((xp) => (
+          <ExperienceItem experience={xp} />
+        ))}
+      </div>
+    </ResumeSection>
+  )}
+
+  {skills.length > 0 && (
+    <ResumeSection id="skills" title="Skills" index={idx()}>
+      <div class="grid-cards">
+        {skills.map((group) => (
+          <SkillGroup group={group} />
+        ))}
+      </div>
+    </ResumeSection>
+  )}
+
+  {projects.length > 0 && (
+    <ResumeSection id="projects" title="Projects" index={idx()}>
+      <div class="grid-cards">
+        {projects.map((project) => (
+          <ProjectItem project={project} />
+        ))}
+      </div>
+    </ResumeSection>
+  )}
+
+  {education.length > 0 && (
+    <ResumeSection id="education" title="Education" index={idx()}>
+      <ul class="stack-list">
+        {education.map((ed) => (
+          <li class="card">
+            <h3>{ed.credential}</h3>
+            <p class="credential__meta">{ed.institution}</p>
+            {ed.details && <p>{ed.details}</p>}
+          </li>
+        ))}
+      </ul>
+    </ResumeSection>
+  )}
+
+  {certifications.length > 0 && (
+    <ResumeSection id="certifications" title="Certifications" index={idx()}>
+      <ul class="chips" aria-label="Certifications">
+        {certifications.map((cert) => (
+          <li class="chip">
+            {cert.url ? (
+              <a href={cert.url} target="_blank" rel="noopener noreferrer">
+                {cert.name}
+              </a>
+            ) : (
+              cert.name
+            )}
+            {cert.issuer && <span class="credential__meta"> · {cert.issuer}</span>}
+          </li>
+        ))}
+      </ul>
+    </ResumeSection>
+  )}
+
+  {languages.length > 0 && (
+    <ResumeSection id="languages" title="Languages" index={idx()}>
+      <ul class="grid-cards">
+        {languages.map((lang) => (
+          <li class="card">
+            <h3>{lang.language}</h3>
+            <p class="credential__meta">{lang.proficiency}</p>
+          </li>
+        ))}
+      </ul>
+    </ResumeSection>
+  )}
+
+  {publications.length > 0 && (
+    <ResumeSection id="publications" title="Publications" index={idx()}>
+      <ul class="stack-list">
+        {publications.map((pub) => (
+          <li class="card">
+            <h3>
+              {pub.url ? (
+                <a href={pub.url} target="_blank" rel="noopener noreferrer">
+                  {pub.title}
+                </a>
+              ) : (
+                pub.title
+              )}
+            </h3>
+            {(pub.outlet || pub.date) && (
+              <p class="credential__meta">
+                {[pub.outlet, pub.date].filter(Boolean).join(" · ")}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </ResumeSection>
+  )}
+</div>

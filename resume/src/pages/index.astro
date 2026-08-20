@@ -1,0 +1,70 @@
+---
+/**
+ * index.astro — the single résumé page.
+ *
+ * Structure:
+ *   <header>  ExecutiveProfile (always visible: photo, name, headline,
+ *             summary, location/work-auth, the two contact actions)
+ *   <main>    #resume-root wraps the reveal hint + FullResume
+ *   <footer>  privacy + reveal explanation
+ *   sticky mobile contact bar
+ *
+ * #resume-root carries data-reveal-persistence so the client script knows
+ * whether/where to remember the revealed state ("none" | "session" | "local").
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ExecutiveProfile from "../components/ExecutiveProfile.astro";
+import FullResume from "../components/FullResume.astro";
+import ContactActions from "../components/ContactActions.astro";
+import { resume } from "../data/resume.data";
+
+const year = new Date().getFullYear();
+const { contact, profile } = resume;
+---
+
+<BaseLayout>
+  <ExecutiveProfile />
+
+  <main id="main">
+    <div id="resume-root" data-reveal-persistence={contact.revealPersistence}>
+      <!-- Heading focused on reveal (visually part of the flow, sr-friendly). -->
+      <h2 id="full-resume-heading" class="visually-hidden">
+        Full résumé — experience, skills, education and credentials
+      </h2>
+
+      <!-- Shown ONLY when JS is active and the résumé is not yet revealed.
+           With JS off, this hint is hidden and the full résumé shows normally. -->
+      <div class="container">
+        <p class="reveal-hint">
+          The full résumé (experience, skills, education, certifications and
+          languages) appears here when you use one of the contact buttons above.
+          Prefer not to? It is also fully visible with JavaScript disabled and in
+          the printed version — clicking a button is a convenience, not a gate.
+        </p>
+      </div>
+
+      <FullResume />
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>
+        © {year} {profile.fullName}. Built as a static site on Astro — no
+        cookies, no trackers, no third-party scripts.
+      </p>
+      <p>
+        <strong>Reveal &amp; privacy:</strong> the contact buttons open your own
+        WhatsApp or email application with a pre-filled message and reveal the
+        remaining sections on this page. Nothing is sent on your behalf, and the
+        page stores only an anonymous flag (in your browser) to remember that
+        the résumé was expanded. Content hidden before revealing is still present
+        in the page and is not protected — this is a UX convenience, not access
+        control.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Sticky, easily reachable contact on mobile -->
+  <ContactActions variant="bar" />
+</BaseLayout>
