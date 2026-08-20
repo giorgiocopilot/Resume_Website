@@ -1,0 +1,69 @@
+---
+/**
+ * AchievementItem.astro
+ * ----------------------------------------------------------------------------
+ * Renders one achievement using the Minto Pyramid order:
+ *   1. Result (lead)  2. Quantified impact  3. Evidence  4. Actions  5. Context
+ *
+ * The discriminated union guarantees `impact` exists only when quantified.
+ * Unquantified achievements are transparently tagged rather than given a
+ * fabricated number.
+ */
+import type { Achievement } from "../schemas/resume.schema";
+
+interface Props {
+  achievement: Achievement;
+}
+const { achievement }: Props = Astro.props;
+const a = achievement;
+---
+
+<li class="achv">
+  <!-- 1. Result-led summary -->
+  <p class="achv__result">{a.result}</p>
+
+  {a.quantified ? (
+    <!-- 2. Quantified business impact -->
+    <p class="achv__impact">
+      <span class="achv__value">
+        {a.impact.value.toLocaleString("en-US")} {a.impact.unit}
+      </span>
+      {a.impact.basis && <span class="achv__basis">— {a.impact.basis}</span>}
+    </p>
+  ) : (
+    <span class="tag tag--unquantified">Unquantified result</span>
+  )}
+
+  {(a.evidence || a.actions || a.context) && (
+    <dl class="achv__meta">
+      {/* 3. Supporting evidence */}
+      {a.evidence && (
+        <div>
+          <dt>Evidence</dt>
+          <dd>{a.evidence}</dd>
+        </div>
+      )}
+      {/* 4. Actions and methods */}
+      {a.actions && (
+        <div>
+          <dt>Actions</dt>
+          <dd>{a.actions}</dd>
+        </div>
+      )}
+      {/* 5. Business context */}
+      {a.context && (
+        <div>
+          <dt>Context</dt>
+          <dd>{a.context}</dd>
+        </div>
+      )}
+    </dl>
+  )}
+
+  {/* 6. Optional verification status */}
+  {a.verification && (
+    <span class="tag" title="Confidence / verification status">
+      {a.verification}
+    </span>
+  )}
+</li>

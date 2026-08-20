@@ -1,0 +1,30 @@
+---
+/**
+ * ResumeSection.astro
+ * ----------------------------------------------------------------------------
+ * Generic <section> wrapper with a numbered, accessible heading. Rendered only
+ * by callers that already checked the section has content, so optional sections
+ * disappear cleanly when empty.
+ */
+interface Props {
+  id: string;
+  title: string;
+  /** Two-digit index shown before the title, e.g. "01". */
+  index: string;
+  /** Heading level for correct document outline. Defaults to 2. */
+  level?: 2 | 3;
+}
+const { id, title, index, level = 2 }: Props = Astro.props;
+const HeadingTag = `h${level}` as "h2" | "h3";
+const headingId = `${id}-heading`;
+---
+
+<section class="section" id={id} aria-labelledby={headingId}>
+  <div class="container">
+    <div class="section__head">
+      <span class="section__index" aria-hidden="true">{index}</span>
+      <HeadingTag class="section__title" id={headingId}>{title}</HeadingTag>
+    </div>
+    <slot />
+  </div>
+</section>

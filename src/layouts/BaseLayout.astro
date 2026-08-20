@@ -1,0 +1,98 @@
+---
+/**
+ * BaseLayout.astro
+ * ----------------------------------------------------------------------------
+ * Document shell: <head> metadata (SEO, Open Graph, Twitter card, JSON-LD),
+ * global stylesheet, skip link, aria-live announcer, and the single enhancement
+ * script. All styling comes from the external global.css (NO inline styles) so
+ * a strict CSP without style-src 'unsafe-inline' can be used.
+ */
+import "../styles/global.css";
+import { resume } from "../data/resume.data";
+
+const { seo, profile, contact } = resume;
+const canonical = new URL(Astro.url.pathname, seo.canonicalUrl).toString();
+const ogImageAbs = new URL(seo.ogImage, seo.canonicalUrl).toString();
+
+// --- JSON-LD (Schema.org Person) ------------------------------------------
+// Contact fields (email/telephone) are included ONLY when the owner explicitly
+// opts in via seo.exposeContactInStructuredData (default false → privacy).
+const personLd: Record<string, unknown> = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.fullName,
+  jobTitle: profile.headline,
+  description: profile.summary,
+  url: seo.canonicalUrl,
+  image: ogImageAbs,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: profile.location.city,
+    addressCountry: profile.location.country,
+  },
+  sameAs: contact.links.map((l) => l.href),
+};
+if (seo.exposeContactInStructuredData) {
+  personLd.email = `mailto:${contact.email}`;
+  personLd.telephone = `+${contact.whatsappNumber}`;
+}
+const jsonLd = JSON.stringify(personLd);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{seo.title}</title>
+    <meta name="description" content={seo.description} />
+    <meta name="robots" content={seo.robots} />
+    <link rel="canonical" href={canonical} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0a0e1a" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="profile" />
+    <meta property="og:title" content={seo.title} />
+    <meta property="og:description" content={seo.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageAbs} />
+    <meta property="og:image:alt" content={profile.photo.alt} />
+    <meta property="og:locale" content="en" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={seo.title} />
+    <meta name="twitter:description" content={seo.description} />
+    <meta name="twitter:image" content={ogImageAbs} />
+    {seo.twitterHandle && (
+      <meta name="twitter:creator" content={`@${seo.twitterHandle}`} />
+    )}
+
+    <!-- Structured data. NOTE: type="application/ld+json" is DATA, not
+         executable JS, but CSP still governs it; the postbuild step adds this
+         block's SHA-256 hash to script-src (see scripts/postbuild-csp.mjs). -->
+    <script type="application/ld+json" set:html={jsonLd} is:inline />
+
+    <!-- The only client script: progressive enhancement for the reveal UX.
+         Bundled by Astro to an external module (script-src 'self'). -->
+    <script>
+      import "../scripts/reveal-resume.ts";
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Polite live region: announces the reveal to assistive tech. -->
+    <div
+      id="reveal-announcer"
+      class="visually-hidden"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <slot />
+  </body>
+</html>

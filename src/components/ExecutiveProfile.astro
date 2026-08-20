@@ -1,0 +1,79 @@
+---
+/**
+ * ExecutiveProfile.astro
+ * ----------------------------------------------------------------------------
+ * Above-the-fold hero: portrait, name, headline, executive summary, location /
+ * work-authorization summary, the two primary contact actions, and the labelled
+ * external links. Uses semantic <header> + <address> for contact metadata.
+ */
+import { resume } from "../data/resume.data";
+import ContactActions from "./ContactActions.astro";
+
+const { profile, contact } = resume;
+const { photo } = profile;
+---
+
+<header class="hero" id="top">
+  <div class="container">
+    <div class="hero__grid">
+      <div>
+        <p class="eyebrow">Curriculum Vitae</p>
+        <h1 class="hero__name">{profile.fullName}</h1>
+        <p class="hero__headline">{profile.headline}</p>
+        <p class="hero__summary measure">{profile.summary}</p>
+
+        <!-- Location & work authorization summary -->
+        <ul class="hero__meta" aria-label="Location and work authorization">
+          <li>
+            {profile.location.city}, {profile.location.country}
+          </li>
+          {profile.location.remotePreference && (
+            <li>{profile.location.remotePreference}</li>
+          )}
+          <li>{profile.workAuthorization.summary}</li>
+        </ul>
+
+        <ContactActions variant="hero" />
+
+        {contact.links.length > 0 && (
+          <address class="contact-links">
+            {contact.links.map((link) => (
+              <a href={link.href} target="_blank" rel="noopener noreferrer me">
+                {link.label}
+                {link.handle && <span class="visually-hidden"> — {link.handle}</span>}
+              </a>
+            ))}
+          </address>
+        )}
+      </div>
+
+      <div class="portrait">
+        <div class="portrait__frame">
+          <!-- Pre-optimized AVIF/WebP with explicit dimensions (no CLS).
+               Hero image → eager + high fetch priority. -->
+          <picture>
+            <source
+              type="image/avif"
+              srcset={`${photo.srcBase}-480.avif 480w, ${photo.srcBase}-960.avif 960w`}
+              sizes="(min-width: 52rem) 16rem, 34vw"
+            />
+            <source
+              type="image/webp"
+              srcset={`${photo.srcBase}-480.webp 480w, ${photo.srcBase}-960.webp 960w`}
+              sizes="(min-width: 52rem) 16rem, 34vw"
+            />
+            <img
+              src={`${photo.srcBase}-480.webp`}
+              width={photo.width}
+              height={photo.height}
+              alt={photo.alt}
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </picture>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

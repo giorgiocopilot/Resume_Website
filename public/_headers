@@ -1,0 +1,33 @@
+# Cloudflare Pages headers (https://developers.cloudflare.com/pages/configuration/headers/)
+# -----------------------------------------------------------------------------
+# NOTE ON THE CSP HASH PLACEHOLDER:
+#   The only inline <script>s in the built HTML are the Schema.org JSON-LD block
+#   and Astro's small bundled module import. CSP still governs them, so instead
+#   of 'unsafe-inline' we allow their exact SHA-256 hashes. The `postbuild-csp`
+#   step (npm run build) computes the hash of every inline script in dist/ and
+#   replaces the %%INLINE_SCRIPT_HASHES%% token below in the DEPLOYED
+#   dist/_headers. If you edit resume data, just rebuild — the hashes are
+#   regenerated automatically. No 'unsafe-inline', no 'unsafe-eval' is ever used
+#   for JavaScript.
+#
+#   style-src is 'self' only: Astro is configured with inlineStylesheets:'never'
+#   so all CSS is served as external files and there are no inline <style> tags
+#   or style="" attributes to allow.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' %%INLINE_SCRIPT_HASHES%%; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; manifest-src 'self'; upgrade-insecure-requests
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+
+# Long-cache the hashed, immutable build assets.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache optimized images for a day (adjust to taste).
+/images/*
+  Cache-Control: public, max-age=86400
